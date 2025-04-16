@@ -1,0 +1,31 @@
+default_stages: [push, commit]
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '^.*\.(tsv|json|svg)'
+      - id: end-of-file-fixer
+        exclude: '^.*\.(tsv|json|svg)'
+      - id: check-yaml
+      - id: check-added-large-files
+
+  - repo: local
+    hooks:
+      - id: ruff-linter
+        name: "Python: Ruff linter"
+        entry: poetry run ruff check --fix
+        language: system
+        types: [python]
+
+      - id: ruff-format
+        name: "Python: Ruff formatter"
+        entry: poetry run ruff format
+        language: system
+        types: [python]
+      - id: django-migrations
+        name: Check django migrations
+        entry: ./makemigrations.py --check --no-input
+        language: system
+        types: [python]
+        pass_filenames: false
