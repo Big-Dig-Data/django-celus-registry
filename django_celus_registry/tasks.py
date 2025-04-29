@@ -95,7 +95,7 @@ class ChangeTracker:
 @celery.shared_task
 @transaction.atomic
 def update_registry_models():
-    base_url = f"{getattr(settings, "CELUS_REGISTRY_URL", "https://registry.countermetrics.org")}/api/v1/"
+    base_url = f"{getattr(settings, 'CELUS_REGISTRY_URL', 'https://registry.countermetrics.org')}/api/v1/"
 
     logging.info("Starting to download data from registry")
     client = requests.Session()
