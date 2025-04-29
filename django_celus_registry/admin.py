@@ -57,7 +57,6 @@ class SushiServicemAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "url",
-        "linked",
         "ip_address_authorization",
         "api_key_required",
         "platform_attr_required",
@@ -65,10 +64,6 @@ class SushiServicemAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ("id", "url", "counter_release", "platform")
-
-    @admin.display(boolean=True, ordering="linked")
-    def linked(self, obj):
-        return obj.linked
 
     def has_add_permission(self, *args, **kwargs):
         return False
