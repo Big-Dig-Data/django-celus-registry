@@ -8,13 +8,23 @@ from django.conf import settings
 from django.db import models, transaction
 from django.dispatch import Signal
 
-from .models import CounterVersionChoices, Platform, Report, SushiService
-from .serializers import PlatformSerializer, ReportSerializer, SushiServiceSerializer
+from .models import CounterVersionChoices, Notification, Platform, Report, SushiService
+from .serializers import (
+    NotificationSerializer,
+    PlatformSerializer,
+    ReportSerializer,
+    SushiServiceSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
 
 registry_changed = Signal()
+
+
+def get_base_url():
+    url = getattr(settings, "CELUS_REGISTRY_URL", "https://registry.countermetrics.org")
+    return f"{url}/api/v1/"
 
 
 def get_or_none(model_class: typing.Type[models.Model], *args, **kwargs):
@@ -95,12 +105,18 @@ class ChangeTracker:
 @celery.shared_task
 @transaction.atomic
 def update_registry_models():
-    base_url = f"{getattr(settings, 'CELUS_REGISTRY_URL', 'https://registry.countermetrics.org')}/api/v1/"
-
-    logging.info("Starting to download data from registry")
     client = requests.Session()
+    modified = update_platforms_and_sushi_services(client)
+    modified = modified or update_notifications(client)
+    if modified:
+        logging.info("Registry changed => triggering signal")
+        registry_changed.send(__name__)
 
-    url = f"{base_url}/platform/"
+
+def update_platforms_and_sushi_services(client: requests.Session):
+    logging.info("Starting to download data from registry")
+
+    url = f"{get_base_url()}/platform/"
     resp = client.get(url)
     logging.debug(f"{url} ({resp.status_code})")
     if resp.status_code != 200:
@@ -236,3 +252,46 @@ def update_registry_models():
             deleted=tracker.deleted,
             created=tracker.created,
         )
+
+
+def update_notifications(client: requests.Session) -> bool:
+    """returns True if notifications were modified"""
+    url = f"{get_base_url()}/notification/"
+    modified = False
+    seen_ids = set()
+    while url:
+        resp = client.get(url)
+        logging.debug(f"{url} ({resp.status_code})")
+        if resp.status_code != 200:
+            logging.warning("Unable to download notifications. Terminating")
+            return
+        data = resp.json()
+        for notification_data in data.get("results", []):
+            seen_ids.add(notification_data["id"])
+            if old_object := Notification.objects.filter(
+                id=notification_data["id"]
+            ).last():
+                serializer = NotificationSerializer(old_object, data=notification_data)
+                serializer.is_valid(raise_exception=True)
+                old_serializer = NotificationSerializer(old_object)
+                record_modified = (
+                    modified or old_serializer.data != serializer.validated_data
+                )
+                if record_modified:
+                    serializer.save()
+            else:
+                serializer = NotificationSerializer(data=notification_data)
+                serializer.is_valid(raise_exception=True)
+                record_modified = True
+                # Create new notification
+                serializer.save()
+
+            modified = modified or record_modified
+            # Update models
+            serializer.save()
+
+        url = data.get("next", None)
+
+    # delete removed notifications
+    delete_count, _ = Notification.objects.exclude(pk__in=seen_ids).delete()
+    return modified or bool(delete_count)

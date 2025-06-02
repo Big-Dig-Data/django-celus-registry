@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Platform, SushiService
+from .models import Notification, Platform, SushiService
 
 
 class ReportsInline(admin.TabularInline):
@@ -52,7 +52,7 @@ class PlatformAdmin(admin.ModelAdmin):
 
 
 @admin.register(SushiService)
-class SushiServicemAdmin(admin.ModelAdmin):
+class SushiServiceAdmin(admin.ModelAdmin):
     search_fields = ("url", "id")
     list_display = (
         "id",
@@ -64,6 +64,47 @@ class SushiServicemAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ("id", "url", "counter_release", "platform")
+
+    def has_add_permission(self, *args, **kwargs):
+        return False
+
+    def has_delete_permission(self, *args, **kwargs):
+        return False
+
+    def has_change_permission(self, *args, **kwargs):
+        return False
+
+    def get_actions(self, *args, **kwargs):
+        return []
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    search_fields = ("subject", "message")
+    list_display = (
+        "id",
+        "type",
+        "source",
+        "start_date",
+        "end_date",
+        "published_date",
+        "last_modified",
+        "sushi_service",
+        "subject",
+    )
+    readonly_fields = (
+        "id",
+        "type",
+        "source",
+        "start_date",
+        "end_date",
+        "published_date",
+        "last_modified",
+        "sushi_service",
+        "subject",
+        "message",
+    )
+    list_filter = ("source", "type")
 
     def has_add_permission(self, *args, **kwargs):
         return False

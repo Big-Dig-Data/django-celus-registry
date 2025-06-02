@@ -96,3 +96,27 @@ class ReportToPlatform(models.Model):
 
     def __str__(self):
         return type(self).__name__
+
+
+class Notification(models.Model):
+    # TODO linked ReportViews
+    # TODO linked UsageDataHost
+
+    id = models.UUIDField(primary_key=True)
+    source = models.CharField(max_length=16)
+    type = models.CharField(max_length=12)
+    sushi_service = models.ForeignKey(
+        SushiService,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+        blank=True,
+        null=True,
+    )
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    subject = models.CharField(max_length=128)
+    message = models.TextField(blank=True)
+    published_date = models.DateTimeField(
+        blank=True, null=True, help_text="When the notification was published"
+    )
+    last_modified = models.DateTimeField()
