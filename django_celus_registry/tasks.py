@@ -267,7 +267,6 @@ def update_notifications(client: requests.Session) -> bool:
             logging.warning("Unable to download notifications. Terminating")
             return
         data = resp.json()
-        breakpoint()
         for notification_data in data.get("results", []):
             seen_ids.add(notification_data["id"])
             if old_object := Notification.objects.filter(
