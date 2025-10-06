@@ -120,3 +120,4 @@ class Notification(models.Model):
         blank=True, null=True, help_text="When the notification was published"
     )
     last_modified = models.DateTimeField()
+    reports = models.JSONField(default=list)

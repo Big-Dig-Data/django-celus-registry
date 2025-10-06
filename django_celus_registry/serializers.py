@@ -7,6 +7,8 @@ from .models import CounterVersionChoices, Notification, Platform, Report, Sushi
 
 class CounterReleaseField(serializers.Field):
     def to_representation(self, value):
+        if isinstance(value, str):
+            value = CounterVersionChoices.from_string(value)
         return value.to_string()
 
     def to_internal_value(self, data):
@@ -68,6 +70,7 @@ class NotificationSerializer(serializers.ModelSerializer):
     published_date = serializers.DateTimeField(
         format="%Y-%m-%dT%H:%M:%S.%fZ", default_timezone=timezone.utc
     )
+    reports = ReportSerializer(many=True)
 
     class Meta:
         model = Notification
@@ -82,6 +85,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             "sushi_service",
             "subject",
             "message",
+            "reports",
         )
 
     def convert_sushi_service_data(self, data):
@@ -91,8 +95,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         return data
 
     def to_internal_value(self, data):
-        # For now we ignore reports and data_host fields
-        data.pop("reports")
+        # For now we ignore data_host fields
         data.pop("data_host")
         return self.convert_sushi_service_data(data)
 

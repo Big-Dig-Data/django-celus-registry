@@ -106,7 +106,8 @@ class ChangeTracker:
 @transaction.atomic
 def update_registry_models():
     client = requests.Session()
-    modified = update_platforms_and_sushi_services(client)
+    modified = False
+    # modified = update_platforms_and_sushi_services(client)
     modified = modified or update_notifications(client)
     if modified:
         logging.info("Registry changed => triggering signal")
@@ -266,6 +267,7 @@ def update_notifications(client: requests.Session) -> bool:
             logging.warning("Unable to download notifications. Terminating")
             return
         data = resp.json()
+        breakpoint()
         for notification_data in data.get("results", []):
             seen_ids.add(notification_data["id"])
             if old_object := Notification.objects.filter(
