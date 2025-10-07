@@ -106,8 +106,7 @@ class ChangeTracker:
 @transaction.atomic
 def update_registry_models():
     client = requests.Session()
-    modified = False
-    # modified = update_platforms_and_sushi_services(client)
+    modified = update_platforms_and_sushi_services(client)
     modified = modified or update_notifications(client)
     if modified:
         logging.info("Registry changed => triggering signal")
