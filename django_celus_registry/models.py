@@ -4,9 +4,9 @@ from django.db import models
 
 
 class CounterVersionChoices(models.IntegerChoices):
-    C4 = 4
-    C5 = 5
-    C51 = 51
+    C4 = 4, "4"
+    C5 = 5, "5"
+    C51 = 51, "5.1"
 
     def to_string(self):
         if self == CounterVersionChoices.C4:
@@ -121,3 +121,6 @@ class Notification(models.Model):
     )
     last_modified = models.DateTimeField()
     reports = models.JSONField(default=list)
+
+    def get_type_display(self):
+        return self.type.title()
