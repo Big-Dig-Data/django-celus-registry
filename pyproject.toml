@@ -1,6 +1,6 @@
 [project]
 name = "django-celus-registry"
-version = "0.4.0"
+version = "0.4.1"
 description = "A simple scaper which download plublic data from the registry of COUNTER project"
 authors = [{ name = "Stepan Henek", email = "stepan@bigdigdata.com" }]
 requires-python = ">=3.8"
