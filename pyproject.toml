@@ -36,7 +36,7 @@ Repository = "https://github.com/Big-Dig-Data/django-celus-registry"
 [dependency-groups]
 dev = [
     "pre-commit>=3.5.0,<4",
-    "ruff>=0.6.9,<0.7",
+    "ruff>=0.15.16,<0.16",
 ]
 
 [tool.uv]
