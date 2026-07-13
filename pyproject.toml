@@ -36,11 +36,17 @@ Repository = "https://github.com/Big-Dig-Data/django-celus-registry"
 [dependency-groups]
 dev = [
     "pre-commit>=3.5.0,<4",
+    "pytest>=8.3.5",
+    "pytest-django>=4.11.1",
     "ruff>=0.15.16,<0.16",
 ]
 
 [tool.uv]
 default-groups = "all"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+pythonpath = ["."]
 
 [build-system]
 requires = ["uv_build>=0.9.26,<0.12.0"]
